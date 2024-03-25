@@ -11,7 +11,7 @@ func main() {
 	r := router.New()
 	r.AddRoute(&router.Route{
 		Method:  http.MethodGet,
-		Path:    "/hello/*",
+		Path:    "/hello/:id",
 		Handler: handler.HelloHandler(),
 	})
 

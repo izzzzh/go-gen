@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"github.com/valyala/fasthttp"
 	"go-gen/gee/tree"
 	"net/http"
@@ -42,7 +41,6 @@ func (r *Router) Handle(ctx *fasthttp.RequestCtx) {
 	}
 	handler := result.Item.(fasthttp.RequestHandler)
 	for k, v := range result.Params {
-		fmt.Println(v)
 		ctx.SetUserValue(k, v)
 	}
 	handler(ctx)

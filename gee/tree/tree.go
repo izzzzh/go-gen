@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	errMethodNotAllow = errors.New("method not allow")
 	errRouterNotFound = errors.New("router not found")
 )
 
