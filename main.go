@@ -8,12 +8,11 @@ import (
 )
 
 func main() {
-	r := router.New()
-	r.AddRoute(&router.Route{
+	engine := gee.NewEngine()
+	engine.AddRoute(&router.Route{
 		Method:  http.MethodGet,
 		Path:    "/hello/:id",
 		Handler: handler.HelloHandler(),
 	})
-
-	gee.Start(r)
+	engine.Start()
 }

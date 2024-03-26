@@ -1,4 +1,4 @@
 go web框架。参照go-zero，geektutu/7days-golang
 
-路由使用fasthttp
+使用fasthttp，简单实现路由
 

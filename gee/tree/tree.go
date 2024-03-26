@@ -2,6 +2,7 @@ package tree
 
 import (
 	"errors"
+	"github.com/valyala/fasthttp"
 	"strings"
 )
 
@@ -12,10 +13,10 @@ var (
 type (
 	Node struct {
 		pattern  []string
-		part     string  // 路由中的一部分，例如 :lang
-		children []*Node // 子节点，例如 [doc, tutorial, intro]
-		isWild   bool    // 是否精确匹配，part 含有 : 或 * 时为true
-		item     any
+		part     string
+		children []*Node
+		isWild   bool
+		item     fasthttp.RequestHandler
 	}
 
 	Tree struct {
@@ -23,18 +24,18 @@ type (
 	}
 
 	Result struct {
-		Item   any
+		Item   fasthttp.RequestHandler
 		Params map[string]string
 	}
 )
 
-func NeeTree() *Tree {
+func NewTree() *Tree {
 	return &Tree{
 		root: &Node{},
 	}
 }
 
-func (t *Tree) Add(parts []string, handler any) error {
+func (t *Tree) Add(parts []string, handler fasthttp.RequestHandler) error {
 	node := t.root
 	err := node.add(parts, 0, handler)
 	return err
@@ -51,11 +52,22 @@ func (t *Tree) Search(parts []string) (Result, error) {
 	params := make(map[string]string)
 	for i := range pattern {
 		part := pattern[i]
+		if len(part) == 0 {
+			continue
+		}
 		if part[0] == ':' {
 			params[part[1:]] = parts[i]
 		}
 		if part[0] == '*' && len(part) > 1 {
-			params[part[1:]] = strings.Join(parts[i:], "/")
+			var builder strings.Builder
+			builder.Grow(len(parts[i:]))
+			for j := i; j < len(parts); j++ {
+				builder.WriteString(parts[j])
+				if j != len(parts)-1 {
+					builder.WriteString("/")
+				}
+			}
+			params[part[1:]] = builder.String()
 			break
 		}
 	}
@@ -64,7 +76,7 @@ func (t *Tree) Search(parts []string) (Result, error) {
 	return ret, nil
 }
 
-func (n *Node) add(parts []string, height int, handler any) error {
+func (n *Node) add(parts []string, height int, handler fasthttp.RequestHandler) error {
 	if len(parts) == height {
 		n.item = handler
 		n.pattern = parts
